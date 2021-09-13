@@ -1,33 +1,28 @@
 # Workflow to Templatize Vault Policies for AppRoles utilizing Entities and Aliases
 
 
-## Description: In the scenario where you need to create a single Vault policy template to automatically match an an entity (Approle in this example) to a secret mount (KV in this example) using entity aliases.
+> **Description:** In the scenario where you need to create a single Vault policy template to automatically match an an entity (Approle in this example) to a secret mount (KV in this example) using entity aliases. Additional docs about templatizing vault policies are [here](https://www.vaultproject.io/docs/concepts/policies#templated-policies). 
 
 
-
-## Steps:
-
-## Step 0: Let's assume the following names for the policy, entity, and AppRole:
+### Step 0: Let's assume the following names for the policy, entity, and AppRole respectively:
 
 Policy Name: `template` 
 Entity Name: `foo`
 Approle Name: `bar`
 
-## Step 1: create our entity name in the desired format
+### Step 1: create our entity name in the desired format
 
 `vault write identity/entity name="foo"`
 
-## Step 2: create our approle role
+### Step 2: create our approle role
 
 `vault write auth/approle/role/bar token_policies="template" token_ttl=72h token_max_ttl=124h`
 
-## Step 3: Retrieve the role-id, as we need to use this as an alias on our entity
-
+### Step 3: Retrieve the role-id, as we need to use this as an alias on our entity
 
 `vault read auth/approle/role/bar/role-id`
 
-## Step 4: Add this role-id as an alias of our original entity
-where name is our approle role-id and canonical_id is the id of our original entity 
+### Step 4: Add this role-id as an alias of our original entity where name is our approle role-id and canonical_id is the id of our original entity 
 
 ```
 
@@ -50,7 +45,7 @@ canonical_id    1b698db1-e89e-cb0b-6fc7-0d743507b631
 id              f307166c-d67a-1937-b8c6-430511994e79
 ```
 
-## Step 5: Get our approle secret-id and login through the approle to get a token
+### Step 5: Get our approle secret-id and login through the approle to get a token
 
 ```
  vault write -f auth/approle/role/bar/secret-id
@@ -75,7 +70,7 @@ policies                ["default" "template"]
 token_meta_role_name    bar
 ```
 
-## Step 6: Review our associated policy
+### Step 6: Review our associated policy
 
 ```
 vault policy read template
@@ -84,13 +79,13 @@ path "kv/data/{{identity.entity.name}}/*" {
 }
 ```
 
-## Step 7: Create KV/ Secret
+### Step 7: Create KV/ Secret
 ```
  vault secrets enable -version=2 kv
  vault kv put kv/foo/apikey webapp="12344567890"
 ```
 
-## Step 8: Login with Token and retrieve secret. 
+### Step 8: Login with Token and retrieve secret. 
 
 ```
 vault login s.kaJY9zm3GDN2AjZbvt5KimEb
