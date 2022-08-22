@@ -1,0 +1,14 @@
+#!/bin/bash
+
+echo "Preparing Vault provider auth..."
+
+jq -n -r --arg JWT "$TFC_WORKLOAD_IDENTITY_TOKEN" --arg ROLE "$TFC_VAULT_RUN_ROLE" '{"jwt": $JWT, "role": $ROLE}' > payload.json
+
+VAULT_TOKEN=$(curl --silent --show-error $VAULT_ADDR/v1/auth/jwt/login \
+    --header "X-Vault-Namespace: $VAULT_NAMESPACE" \
+    --request POST \
+    --data @payload.json | jq -r '.auth.client_token')
+
+echo $VAULT_TOKEN > ~/.vault-token
+
+echo "Vault provider auth prepared"
