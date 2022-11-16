@@ -1,0 +1,34 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tfc-agent-deployment
+  labels:
+    app: tfc-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tfc-agent
+  template:
+    metadata:
+      labels:
+        app: tfc-agent
+    spec:
+      containers:
+      - name: tfc-agent
+        image: hashicorp/tfc-agent:latest
+        env:
+            - name: TFC_AGENT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: tfc-agent-token-secret
+                  key: TFC_AGENT_TOKEN
+            - name: TFC_AGENT_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: TFC_AGENT_SINGLE
+              value: "1"
+            - name: TFC_AGENT_LOG_LEVEL
+              value: "debug"
