@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    app: app
+spec:
+  selector:
+    matchLabels:
+      app: app
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "app"
+        vault.hashicorp.com/tls-skip-verify: "true"
+        vault.hashicorp.com/agent-inject-secret-app-config.txt: "secret/data/app/config"
+        vault.hashicorp.com/agent-inject-template-app-config.txt: |
+          {{- with secret "secret/data/app/config" -}}
+          postgresql://{{ .Data.data.username }}:{{ .Data.data.password }}@postgres:5432/wizard
+          {{- end -}}
+      labels:
+        app: app
+    spec:
+      containers:
+        - name: app
+          image: jweissig/app:0.0.1

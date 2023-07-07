@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-op
+  labels:
+    app: app-op
+spec:
+  selector:
+    matchLabels:
+      app: app-op
+  replicas: 1
+  template:
+    metadata:
+      annotations: 
+        vault.operater : "true"
+      labels:
+        app: app-op
+    spec:
+      containers:
+        - name: app-op
+          image: jweissig/app:0.0.1
+          volumeMounts:
+          - name: vault-kv-app
+            mountPath: "/etc/vault-kv-app"
+            readOnly: true
+          - name: vault-db-app
+            mountPath: "/etc/vault-db-app"
+            readOnly: true
+      volumes:
+       - name: vault-kv-app
+         secret:
+            secretName: vault-kv-app
+            optional: true
+       - name: vault-db-app
+         secret:
+            secretName: vault-db-app
+            optional: true
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: vault-kv-app
+spec:
+  type: kv-v2
+  mount: secret
+  path: app/config
+  # dest k8s secret
+  destination:
+    name: vault-kv-app
+    create: true
+  # static secret refresh interval
+  refreshAfter: 30s
+  # Name of the CRD to authenticate to Vault
+  vaultAuthRef: default
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultDynamicSecret
+metadata:
+  name: vault-db-app
+spec:
+  mount: db
+  # Path to the secret
+  path: "creds/readonly"
+  # Where to store the secrets, VSO will create the secret
+  destination:
+    create: true
+    name: vault-db-app
+  # Restart these pods when secrets rotated
+  rolloutRestartTargets:
+  - kind: Deployment
+    name: app-op
+  # Name of the CRD to authenticate to Vault
+  vaultAuthRef: default

@@ -5,12 +5,14 @@ This is a demo that covers the following scenarios:
 - Deploying and configuraing Vault + Sidecar on K8s using Helm
 - Deploying an application that fetches secrets from Vault's KV Secret Engine (Static Secrets)
 - Deploying an application that fetches secrets from Vault's Database Secret Engine (Dynamic Secrets)
+- Deploying Vault Secret Operater (VSO) and using it to fetch secrets to pods
 - Kubernetes Auth Validation
 - Integrating Vault with Cert Manager
 
 ### Assumptions
 
 This demo assumes you have the following:
+
 - A Kubernetes Cluster ( I'm using Docker Desktop with k8s v1.20+ with kubectl configrued)
 - Helm v3.6+ installed
 - Vault CLI is installed  
@@ -24,17 +26,14 @@ $ helm repo add hashicorp https://helm.releases.hashicorp.com
 "hashicorp" has been added to your repositories
 ```
 
-2. Next, we'll install Vault HA cluster plus sidecar service. Note that you can configure additional parameters using Helm [configuration options](https://developer.hashicorp.com/vault/docs/platform/k8s/helm/configuration)
+2. Next, we'll install Vault plus sidecar service. Note that you can configure additional parameters using Helm [configuration options](https://developer.hashicorp.com/vault/docs/platform/k8s/helm/configuration)
 
 ```
-helm install vault hashicorp/vault \
-  --set='server.ha.raft.enabled=true' \
-  --set='injector.enabled=true'
 
-
+helm install --create-namespace --namespace vault vault hashicorp/vault --set='server.dev.enabled=true' --set='injector.enabled=true'
 NAME: vault
-LAST DEPLOYED: Tue Dec  6 21:43:20 2022
-NAMESPACE: default
+LAST DEPLOYED: Thu Jul  6 23:38:06 2023
+NAMESPACE: vault
 STATUS: deployed
 REVISION: 1
 NOTES:
@@ -52,86 +51,55 @@ Your release is named vault. To learn more about the release, try:
   $ helm get manifest vault
 ```
 
-3. Check if pods have been deployed successfully. It's expected that they won't be in the READY state until after we initiatlize Vault:
+3. Check if pods have been deployed successfully:
 
 ```
-k get pod
-NAME                                    READY   STATUS    RESTARTS   AGE
-vault-0                                 0/1     Running   0          58s
-vault-agent-injector-77fd4cb69f-xpf7z   1/1     Running   0          59s
+$ kubectl get pod -n vault                                             
+NAME                                   READY   STATUS    RESTARTS   AGE
+vault-0                                1/1     Running   0          19s
+vault-agent-injector-574778f7c-gvkmh   1/1     Running   0          20s
 ```
 
-4. Initalize and unseal Vault:
-
-```
- kubectl exec -ti vault-0 -- vault operator init
-Unseal Key 1: DziEXW69r5QNI4RYMGZdtdsxxx
-Unseal Key 2: da9Bb4XPfnEDXm7WCroR8ETj7JzGxxx
-Unseal Key 3: 9pGADPtIvRE5aSzCOx+PdxOvsB9XpVGLJxxx
-Unseal Key 4: rGBq0uUgCsFnjg0ylNf5iH9myXiw8bf9HrIO/xLDcdaY
-Unseal Key 5: 80hCjv53dNFeng9A3n0sxxxx
-
-Initial Root Token: hvs.rrlbeyUCLjxxx2Oj7LV
-
-Vault initialized with 5 key shares and a key threshold of 3. Please securely
-distribute the key shares printed above. When the Vault is re-sealed,
-restarted, or stopped, you must supply at least 3 of these keys to unseal it
-before it can start servicing requests.
-
-Vault does not store the generated root key. Without at least 3 keys to
-reconstruct the root key, Vault will remain permanently sealed!
-
-It is possible to generate new unseal keys, provided you have a quorum of
-existing unseal keys shares. See "vault operator rekey" for more information.
-
-
-# Then unseal Vault ( repeat this step three times and provide 3 out of the 5 unseal keys )
-$ kubectl exec -ti vault-0 -- vault operator unseal 
+4. Set up your local vault client to connect to Vault server that you just deployed. 
 
 ```
 
-5. Login to Vault:
+$ kubectl get svc -n vault  
+NAME                       TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)             AGE
+vault                      ClusterIP   10.96.235.33   <none>        8200/TCP,8201/TCP   113s
+vault-agent-injector-svc   ClusterIP   10.99.25.76    <none>        443/TCP             113s
+vault-internal             ClusterIP   None           <none>        8200/TCP,8201/TCP   113s
 ```
 
-$ kubectl get pod -o wide                              
-NAME                                    READY   STATUS    RESTARTS   AGE   IP         NODE             NOMINATED NODE   READINESS GATES
-vault-0                                 0/1     Running   0          69s   10.1.0.9   docker-desktop   <none>           <none>
-vault-agent-injector-77fd4cb69f-nstgt   1/1     Running   0          69s   10.1.0.8   docker-desktop   <none>           <none>
+You can now use the ClusterIP for the `vault` service. In my case, it's `10.96.235.33`
 
-# Set up Vault CLI
-$ export VAULT_ADDR=http://10.1.0.9:8200
-$ export VAULT_TOKEN=hvs.rrlbeyUCLjRlnxVIl02Oj7LV
-$ vault status                          
+```
+$ export VAULT_ADDR=http://10.96.235.33:8200
+$ export VAULT_TOKEN='root'
+$ vault status                                        
 Key             Value
 ---             -----
 Seal Type       shamir
 Initialized     true
 Sealed          false
-Total Shares    5
-Threshold       3
-Version         1.12.1
-Build Date      2022-10-27T12:32:05Z
-Storage Type    file
-Cluster Name    vault-cluster-5826a45b
-Cluster ID      0bef9881-1163-1dd5-29c6-50123196e1db
+Total Shares    1
+Threshold       1
+Version         1.14.0
+Build Date      2023-03-23T12:51:35Z
+Storage Type    inmem
+Cluster Name    vault-cluster-e68748a9
+Cluster ID      56c546a9-774e-617c-f547-c86a60f7abfc
 HA Enabled      false
-
 ```
 
 ## Deploying an application that fetches secrets from Vault's KV Secret Engine (Static Secrets)
 
-1. Enable the KV secret engine. 
+1. Create a secret 
 
 ```
-vault secrets enable -version=2 -path secret kv
-```
-
-2. Create a secret 
-
-```
-vault kv put secret/app1/config username="demo" password="k8s-demo"
+vault kv put secret/app/config username="demo" password="k8s-demo"
 ===== Secret Path =====
-secret/data/app1/config
+secret/data/app/config
 
 ======= Metadata =======
 Key                Value
@@ -145,8 +113,8 @@ version            1
 3. Create a policy
 
 ```
-vault policy write app1 - <<EOF
-path "secret/data/app1/config" {
+vault policy write app - <<EOF
+path "secret/data/app/config" {
 capabilities = ["read"]
 }
 EOF
@@ -167,31 +135,32 @@ vault write auth/kubernetes/config \
 
 5. Create a role 
 ```
-vault write auth/kubernetes/role/app1 \
-        bound_service_account_names=app1 \
-        bound_service_account_namespaces=default \
-        policies=app1 \
+vault write auth/kubernetes/role/app \
+        bound_service_account_names=default \
+        bound_service_account_namespaces=vault \
+        policies=app \
         ttl=24h
 ```
 6. Deploy the app
 
 ```
-kubectl apply -f app1.yaml
+k apply -f 00-app.yaml -n vault
 ```
 
 ```
-kubectl get pod
+kubectl get pod -n vault 
 NAME                                    READY   STATUS    RESTARTS   AGE
 app1-6f9967f5f4-852fb                   2/2     Running   0          6s
 vault-0                                 1/1     Running   0          76m
 vault-agent-injector-77fd4cb69f-nstgt   1/1     Running   0          76m
 ```
 
-7. Showcase that the secret was successfully fetched from Vault
+7. Showcase that the secret was successfully fetched from Vault and was templated correctly: 
+
 ```
-kubectl exec \
-    $(kubectl get pod -l app=app1 -o jsonpath="{.items[0].metadata.name}") \
-    --container app1 -- cat /vault/secrets/app1-config.txt ; echo
+kubectl exec -n vault \
+    $(kubectl get -n vault pod -l app=app -o jsonpath="{.items[0].metadata.name}") \
+    --container app -- cat /vault/secrets/app-config.txt ; echo
 
 postgresql://demo:k8s-demo@postgres:5432/wizard
 ```
@@ -202,13 +171,13 @@ postgresql://demo:k8s-demo@postgres:5432/wizard
 1. Deploy the application with postgres database
 
 ```
-$ kubectl apply -f app-db.yaml
+$ kubectl apply -f app-db.yaml -n vault
 ```
 
 ### Need to create this ro role
 ```
-$ DB_POD=$(kubectl get pod -l app=db -o jsonpath="{.items[0].metadata.name}")
-$ kubectl exec -it $DB_POD -- psql -U postgres -d postgres -p 5432
+$ DB_POD=$(kubectl get -n vault pod -l app=db -o jsonpath="{.items[0].metadata.name}")
+$ kubectl exec -n vault -it $DB_POD -- psql -U postgres -d postgres -p 5432
 ```
 
 ### Create a ro user
@@ -222,7 +191,7 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public TO "ro";
 ```
 export POSTGRES_USER=postgres
 export POSTGRES_PASSWORD=postgres
-export SERVICE_IP=$(kubectl get svc  db -o jsonpath='{.spec.clusterIP}')
+export SERVICE_IP=$(kubectl get -n vault svc  db -o jsonpath='{.spec.clusterIP}')
 
 vault secrets enable -path db database
 
@@ -244,44 +213,37 @@ vault write -force db/rotate-root/postgres
 vault write db/roles/readonly \
       db_name=postgres \
       creation_statements=@readonly.sql \
-      default_ttl=2m \
-      max_ttl=2m
+      default_ttl=10m \
+      max_ttl=20m
 ```
 
 ### Policy to allow app to access path
 
 ```
 vault policy write app - <<EOF
+path "secret/data/app/config" {
+    capabilities = ["read"]
+}
 path "db/creds/readonly" {
     capabilities = ["read"]
 }
 EOF
 ```
 
-### Aligning k8s role to policy
-
-```
-vault write auth/kubernetes/role/app2 \
-        bound_service_account_names=app2 \
-        bound_service_account_namespaces=default \
-        policies=app \
-        ttl=24h
-```
-
 - Verifying that the secret had been generated:
 
 ```
-kubectl exec \
-    $(kubectl get pod -l app=app2 -o jsonpath="{.items[0].metadata.name}") \
-    --container app2 -- cat /vault/secrets/app-config.txt ; echo
+kubectl exec -n vault \
+    $(kubectl get -n vault pod -l app=app-db -o jsonpath="{.items[0].metadata.name}") \
+    --container app-db -- cat /vault/secrets/app-config.txt ; echo
 password: LaDENbiOlf8Mpz-oKnhC
 username: v-kubernet-readonly-8f1Xg1Pb5Mlx4jSq3Bn2-1670368659
 ```
 
 - Verifying that a user had been created in the DB
 ```
-$ DB_POD=$(kubectl get pod -l app=db -o jsonpath="{.items[0].metadata.name}")
-$ kubectl exec -it $DB_POD -- psql -U postgres -d postgres -p 5432
+$ DB_POD=$(kubectl get -n vault pod -l app=db -o jsonpath="{.items[0].metadata.name}")
+$ kubectl exec -n vault -it $DB_POD -- psql -U postgres -d postgres -p 5432
 
 postgres=# SELECT usename, valuntil FROM pg_user;
                        usename                       |        valuntil        
@@ -298,7 +260,7 @@ postgres=# SELECT usename, valuntil FROM pg_user;
 vault lease revoke -force -prefix lease_id=database/creds/readonly
 ```
 
-### Uninstalling (Optional)
+### Uninstalling (Optional, don't do if you're doing the VSO section)
 
 
 ```
@@ -308,13 +270,65 @@ $ vault secrets disable db
 
 # Delete deployments
 
-$ kubectl delete -f app-db.yaml                                           
-namespace "vault-demo" deleted
-serviceaccount "demo-sa" deleted
+$ kubectl delete -f 01-app-db.yaml -n vault                                           
 deployment.apps "app" deleted
 deployment.apps "db" deleted
 service "db" deleted
 configmap "postgres-configuration" deleted
+```
+
+# Deploying Vault Secret Operater (VSO) and using it to fetch secrets to pods
+
+
+1. Deploy Vault Secrets Operator using Helm
+
+```
+$ helm install vault-secrets-operator hashicorp/vault-secrets-operator --version 0.1.0 -n vault --values operator-values.yaml
+
+```
+
+2. Deploy the application 
+
+```
+$ kubectl apply -f 02-app-op-static.yaml -n vault
+```
+
+3. Verify that the application is deployed
+
+```
+$ kubectl get pod -n vault
+NAME                                                         READY   STATUS    RESTARTS   AGE
+app-64b7788bb9-n6nsw                                         2/2     Running   0          19h
+app-db-7f6b5c989c-7wwjr                                      2/2     Running   0          19h
+app-op-6d8df6f5c4-zgww4                                      1/1     Running   0          5m24s
+db-6fd96bf59c-kx5pr                                          1/1     Running   0          19h
+vault-0                                                      1/1     Running   0          19h
+vault-agent-injector-5dddb46ff-9sh82                         1/1     Running   0          19h
+vault-secrets-operator-controller-manager-77b654b4bf-pl8hp   2/2     Running   0          78m
+```
+
+4. The application successfully deployed and given that the secret was fetched from Vault and created as a native k8s secret we can verify like this :
+
+```
+$  kubectl get secret -n vault             
+NAME                                           TYPE                 DATA   AGE
+sh.helm.release.v1.vault-secrets-operator.v1   helm.sh/release.v1   1      113m
+sh.helm.release.v1.vault.v1                    helm.sh/release.v1   1      20h
+vault-db-app                                   Opaque               3      10m
+vault-kv-app                                   Opaque               3      10s
+vso-cc-storage-hmac-key                        Opaque               1      4h13m
+
+
+$ kubectl get secret vault-kv-app -o jsonpath="{.data.username}" -n vault | base64 --decode
+demo  
+$ kubectl get secret vault-kv-app -o jsonpath="{.data.password}" -n vault | base64 --decode
+k8s-demo
+
+$ kubectl get secret vault-db-app  -o jsonpath="{.data.username}" -n vault | base64 --decode
+v-kubernet-readonly-8Fmw5dOOVSu6FfcswnR5-1688765101
+
+$ kubectl get secret vault-db-app  -o jsonpath="{.data.password}" -n vault | base64 --decode
+c5tsUb-EkgBlRYjtpT6G
 ```
 
 # Kubernetes Auth Validation
@@ -323,7 +337,7 @@ configmap "postgres-configuration" deleted
 
 ```
 # Generating a JWT token for the app1 service account
-JWT=$(kubectl create token app1)
+JWT=$(kubectl create token app1 -n vault)
 # Verifing that using this JWT token we can authenticate into K8s
 vault write auth/kubernetes/login role=app1 jwt=$JWT
 Key                                       Value
@@ -341,7 +355,8 @@ token_meta_service_account_namespace      default
 token_meta_service_account_secret_name    n/a
 token_meta_service_account_uid            9bef8d15-30ad-4c4b-bda2-93e098871527
 ```
-### Integrating Vault with Cert Manager
+
+## Integrating Vault with Cert Manager
 
 1. Enabling and Configure PKI in Vault
 
@@ -611,6 +626,11 @@ Events:
   Normal  Requested  41m                cert-manager  Created new CertificateRequest resource "example-com-6kf2v"
   Normal  Issuing    41m (x2 over 42m)  cert-manager  The certificate has been successfully issued
 ```
+
+## Deploying Vault Secret Operator
+
+
+
 
 ## References
 
