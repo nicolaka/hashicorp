@@ -1,6 +1,6 @@
 services:
   vault:
-    image: hashicorp/vault:1.10.1
+    image: hashicorp/vault:1.15.0
     ports:
       - "8200:8200"
     environment:

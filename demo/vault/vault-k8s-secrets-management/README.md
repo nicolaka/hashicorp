@@ -283,7 +283,7 @@ configmap "postgres-configuration" deleted
 1. Deploy Vault Secrets Operator using Helm
 
 ```
-$ helm install vault-secrets-operator hashicorp/vault-secrets-operator --version 0.1.0 -n vault --values operator-values.yaml
+$ helm install vault-secrets-operator hashicorp/vault-secrets-operator --version 0.3.4 -n vault --values operator-values.yaml
 
 ```
 

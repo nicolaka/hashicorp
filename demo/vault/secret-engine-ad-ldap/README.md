@@ -134,17 +134,21 @@ token_meta_username    Alice
 
 vault secrets enable ad
 
-vault write ad/config \
+vault secrets enable ldap
+
+vault write ldap/config \
           binddn="cn=vault-reset,cn=Users,dc=hashicorp,dc=example" \
-          bindpass=P@ssword1 \
+          bindpass="P@ssword1" \
           url=ldaps://dc:636 \
           userdn="dc=hashicorp,dc=example" \
-          insecure_tls=true
+          insecure_tls=true \
+          password_policy=default
+
 
 vault policy write my-application my-application-policy.hcl
 vault write auth/ldap/groups/engineering policies=security,my-application
 
-vault write ad/roles/my-application \
+vault write ldap/roles/my-application \
     service_account_name="my-application@hashicorp.example" \
     ttl=15s \
     max_ttl=30s
@@ -157,6 +161,11 @@ username            my-application
 
 ```
 
+
+vault write ldap/static-role/my-application \
+    dn='uid=my-application,cn=Users,dc=hashicorp,dc=example' \
+    username='my-application' \
+    rotation_period="24h"
 
 7. Service Acccount Check-Out Demo
 
@@ -192,4 +201,101 @@ Code: 400. Errors:
 $ vault write -f ad/library/domain-admins/check-in
 
 ```
+
+
+
+vault write ldap/library/accounting-team \
+    service_account_names=fizz@example.com,buzz@example.com \
+    ttl=10h \
+    max_ttl=20h \
+    disable_check_in_enforcement=false
+
+vault write ldap/library/domain-admins \
+      service_account_names=privileged-account \
+      ttl=1h \
+      max_ttl=8h \
+      disable_check_in_enforcement=false
+
+
+----
+
+
+vault write ldap/static-role/my-application \
+    dn='cn=my-application,ou=Users,dc=hashicorp,dc=example' \
+    username='my-application' \
+    rotation_period="24h"
+
+dn='cn=alice,ou=users,dc=learn,dc=example'
+
+vault write ldap/static-role/bob \
+    username='Bob' \
+    rotation_period="24h"
+
+vault write ldap/static-role/bob \
+    dn="ou=Users,dc=hashicorp,dc=example" \
+    username='Bob' \
+    rotation_period="24h"
+----
+
+
+vault write ldap/static-role/my-application \
+   username="my-application" \
+   rotation_period="24h"
+
+
+vault write ldap/static-role/my-application \
+   username="my-application" \
+   rotation_period="24h"
+
+
+----
+vault write ldap/static-role/my-application \
+   dn="cn=my-application,cn=Users,dc=hashicorp,dc=example" \
+   username="my-application" \
+   rotation_period="24h"
+
+vault write ldap/static-role/bob \
+   username="Bob" \
+   rotation_period="24h"
+
+
+
+
+   vault write ldap/config \
+          binddn="cn=vault-reset,cn=Users,dc=hashicorp,dc=example" \
+          bindpass="P@ssword1" \
+          url=ldaps://dc:636 \
+          userdn="dc=hashicorp,dc=example" \
+          userattr="sAMAccountName" \
+          groupdn="cn=Users,dc=hashicorp,dc=example" \
+          groupattr="cn" \
+          insecure_tls=true \
+          schema=ad \
+          password_policy=default
+
+
+vault write ldap/static-role/my-application \
+   username="my-application" \
+   rotation_period="24h"
+
+
+vault write ldap/static-role/bob \
+   username="Bob" \
+   rotation_period="24h"
+
+
+vault write ldap/static-role/Alice \
+   dn='cn=Alice,cn=Users,dc=hashicorp,dc=example' \
+   username="Alice" \
+   rotation_period="24h"
+
+vault write ldap/static-role/my-application \
+   dn="cn=my-application,cn=Users,dc=hashicorp,dc=example" \
+   username="my-application" \
+   rotation_period="24h"
+
+
+
+
+
 

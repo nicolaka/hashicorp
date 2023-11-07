@@ -9,12 +9,13 @@ services:
       - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
       - VAULT_LICENSE=$VAULT_LICENSE
       - VAULT_DEV_ROOT_TOKEN_ID=root
+      - VAULT_LOG_LEVEL=info
   dc: 
-    image: nicolaka/samba-domain
+    image: nicolaka/samba-domain:test
     ports:
       - "389:389"
       - "636:636"
     environment:
-    - DOMAIN=hashicorp.example
+    - DOMAIN=hashicorp.com
     - DOMAINPASS=P@ssword1
     - INSECURELDAP="true"

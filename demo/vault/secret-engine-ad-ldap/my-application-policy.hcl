@@ -1,3 +1,3 @@
-path "ad/creds/my-application" {
+path "ldap/creds/my-application" {
   capabilities = ["read"]
 }
