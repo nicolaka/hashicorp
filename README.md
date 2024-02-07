@@ -3,13 +3,14 @@
 ## Architecture & Guides
 
 - [Vault + Kubernetes Secret Injection](./arch/vault-k8s-secrets-management/)
+- [Vault Identity Lab: Deep Dive into Entities & Clients](./arch/vault-identity-lab/)
 
 ## Demos
 
 * Vault
     - [Vault AD Secret Engine](./demo/vault/secret-engine-ad-ldap/)
     - [Vault & K8s Sidecar Injection](./demo/vault/vault-k8s-secrets-management/) 
-    - [Vault Policy Templating with Entity Aliases+ AppRole](./demo/vault/policy-template-approle-entity-alias.md)
+    - [Vault Policy Templating with Entity Aliases+ AppRole](./demo/vault/policy-template-approle/)
 * Terraform
     - [Terraform Workload Identity + Vault Just-in-Time Credential Injection](./demo/terraform/tfc-vault-jit-demo/)
     - [Terraform Cloud Agent K8s Deployment](./demo/terraform/tfc-agent-k8s/)
