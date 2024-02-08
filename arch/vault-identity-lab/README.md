@@ -837,17 +837,12 @@ Understanding how entities, entity aliases and clients work in Vault is critical
 - If a client authenticates to Vault in a parent or root namespaces, it is considered the same client in all child namespaces. This is obvious as it is within the same logical isolation. Place that auth in the root namespace to be considered as 1 client in all namespaces. 
 - Entities can have 0 or more entity aliases. 
 - Entities can have only have 1 entity alias from the same auth *mount*
-- entities can have any number of entity aliases from different auth mounts of the same *auth method*
+- Entities can have any number of entity aliases from different auth mounts of the same *auth method*
 - Entity aliases need to be named appropriately based on the [following Auth Method/Name mapping](https://developer.hashicorp.com/hcp/docs/vault/client#authentication-methods-and-how-they-re-counted-in-vault)
 - Entities are global in a performance-replicated multi Vault Enterprise cluster deployments. Clients, however, are only local to the cluster. 
 
 
 ### Some Helpful Vault API Endpoints 
-
-
-| Endpoint | Purpose | Command |
-
-
 
 ```
 
