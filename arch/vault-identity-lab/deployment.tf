@@ -13,6 +13,15 @@ resource "kubernetes_secret_v1" "vault_license" {
   type = "kubernetes.io/opaque"
 }
 
+resource "kubernetes_config_map" "vaultconfig" {
+  metadata {
+    name = "vaultconfig"
+    namespace  = kubernetes_namespace.vault.id
+  }
+  data = {
+    "vault.hcl" = "${file("vault.hcl")}"
+  }
+}
 
 # Deploying sidecar injector helm chart
 resource "helm_release" "vault" {
@@ -22,6 +31,13 @@ resource "helm_release" "vault" {
   namespace  = kubernetes_namespace.vault.id
   version    = var.vault_helm_version
 
+
+  values = [
+    "${file("values.yml")}"
+  ]
+
+# Using a values.yml file instead 
+/*
   set {
     name  = "injector.enabled"
     value = "true"
@@ -74,6 +90,11 @@ resource "helm_release" "vault" {
     name = "ui.serviceNodePort"
     value ="30001"
   }
+  set {
+    name = "server.extraArgs"
+    value = "-config=/etc/vault/config.hcl"
+  }
+  */
 }
 
 # Deploying VSO
@@ -263,4 +284,17 @@ resource "kubernetes_service" "ldap" {
   }
 }
 
+
+## Configuring Vault Audit Logging
+
+resource "vault_audit" "local" {
+  depends_on = [ vault_namespace.red ]
+  type  = "file"
+  path  = "audit"
+  local = true
+  options = {
+    file_path = "/tmp/vault.log"
+    log_raw = true
+  }
+}
 

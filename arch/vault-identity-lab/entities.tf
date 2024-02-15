@@ -100,7 +100,8 @@ resource "vault_identity_entity_alias" "app_a_approle_alias" {
 
 
 resource "vault_identity_entity_alias" "app_a_k8s_alias" {
-  name            = "${data.kubernetes_service_account.blue_default.metadata[0].uid}"
+  name            = "${data.kubernetes_service_account.blue_default.metadata[0].namespace}/${data.kubernetes_service_account.blue_default.metadata[0].name}"
+  #name            = "${data.kubernetes_service_account.blue_default.metadata[0].uid}"
   mount_accessor  = vault_auth_backend.kubernetes.accessor
   canonical_id    = vault_identity_entity.app_a.id
   custom_metadata = {
