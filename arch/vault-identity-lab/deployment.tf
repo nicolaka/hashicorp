@@ -31,7 +31,7 @@ resource "helm_release" "vault" {
   namespace  = kubernetes_namespace.vault.id
   version    = var.vault_helm_version
   values = [
-    "${file("values.yml")}"
+    "${file("values.vault.yml")}"
   ]
 }
 

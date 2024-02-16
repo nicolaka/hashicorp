@@ -157,38 +157,3 @@ resource "vault_kubernetes_auth_backend_role" "app_b" {
   token_policies                   = ["red"]
   audience                         = ""
 }
-
-/*
-### Testing joining two aliases from two different accessors of type k8s
-resource "vault_auth_backend" "kubernetes2" {
-  namespace = var.vault_namespace
-  depends_on = [helm_release.vault]
-  type = "kubernetes"
-  path = "kubernetes2"
-}
-resource "vault_kubernetes_auth_backend_config" "kubernetes2" {
-  depends_on             = [helm_release.vault]
-  namespace             =  var.vault_namespace
-  backend                = vault_auth_backend.kubernetes.path
-  kubernetes_host        = var.kubernetes_endpoint
-  kubernetes_ca_cert     = kubernetes_secret.vault_auth.data["ca.crt"]
-  token_reviewer_jwt     = kubernetes_secret.vault_auth.data.token
-  disable_iss_validation = "true"
-}
-
-
-
-# Creating a K8s Auth Role for App B which will be used by SideCar Injector
-resource "vault_kubernetes_auth_backend_role" "app_c" {
-  namespace                        = var.vault_namespace
-  backend                          = vault_auth_backend.kubernetes2.path
-  role_name                        = "app_c"
-  bound_service_account_names      = ["default"]
-  alias_name_source                = "serviceaccount_uid"
-  bound_service_account_namespaces = [kubernetes_namespace.red.id]
-  token_ttl                        = 3600
-  token_policies                   = ["red"]
-  audience                         = ""
-}
-
-*/

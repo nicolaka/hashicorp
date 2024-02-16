@@ -1,6 +1,5 @@
-/* Uncomment to deploy the Vault Benchmark tool
+# Uncomment to deploy the Vault Benchmark tool
 resource "kubernetes_config_map" "config" {
-
   metadata {
     name = "benchmark"
     namespace = kubernetes_namespace.vault.metadata[0].name
@@ -12,6 +11,7 @@ resource "kubernetes_config_map" "config" {
 
 # Benchmark Job
 resource "kubernetes_job" "benchmark" {
+  depends_on = [helm_release.vault,time_sleep.wait]
   metadata {
     name = "benchmark"
     namespace = kubernetes_namespace.vault.metadata[0].name
@@ -29,7 +29,7 @@ resource "kubernetes_job" "benchmark" {
                 name = "config"
             }
         }
-        restart_policy = "Never"
+        restart_policy = "OnFailure"
         volume {
           name = "config"
           config_map {
@@ -41,4 +41,3 @@ resource "kubernetes_job" "benchmark" {
 }
 wait_for_completion = false
 }
-*/

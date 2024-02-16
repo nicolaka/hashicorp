@@ -54,6 +54,6 @@ spec:
     name: vault-kv-app
     create: true
   # static secret refresh interval
-  refreshAfter: 30s
+  refreshAfter: 5s
   # Name of the CRD to authenticate to Vault
   vaultAuthRef: default

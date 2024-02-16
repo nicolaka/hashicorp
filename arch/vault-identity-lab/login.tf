@@ -1,4 +1,4 @@
-/*
+
 # Authenticating and doing an Entity Lookup 
 resource "vault_generic_endpoint" "bob_token" {
   depends_on     = [vault_generic_endpoint.bob]
@@ -132,6 +132,6 @@ output "alice_entity_lookup_id" {
 output "dave_entity_lookup_id" {
   value = try(vault_generic_endpoint.dave_entity.write_data["id"],[])
 }
-*/
+
 
 
