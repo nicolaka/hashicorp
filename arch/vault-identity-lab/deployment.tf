@@ -30,71 +30,9 @@ resource "helm_release" "vault" {
   chart      = "vault"
   namespace  = kubernetes_namespace.vault.id
   version    = var.vault_helm_version
-
-
   values = [
     "${file("values.yml")}"
   ]
-
-# Using a values.yml file instead 
-/*
-  set {
-    name  = "injector.enabled"
-    value = "true"
-  }
-  set {
-    name  = "injector.logLevel"
-    value = "debug"
-  }
-  set {
-    name  = "injector.authPath"
-    value = "auth/kubernetes"
-  }
-  set {
-    name  = "global.tlsDisable"
-    value = "true"
-  }
-  set {
-    name = "server.dev.enabled"
-    value ="true"
-  }
-  set {
-    name = "server.enterpriseLicense.secretName"
-    value ="vaultlicense"
-  }
-  set {
-    name = "server.enterpriseLicense.secretKey"
-    value ="license"
-  }
-  set {
-    name = "server.image.repository"
-    value ="hashicorp/vault-enterprise"
-  }
-  set {
-    name = "server.image.tag"
-    value = var.vault_version
-  }
-  set {
-    name = "server.logLevel"
-    value = "trace"
-  }
-  set {
-    name = "ui.enabled"
-    value ="true"
-  }
-  set {
-    name = "ui.serviceType"
-    value ="NodePort"
-  }
-  set {
-    name = "ui.serviceNodePort"
-    value ="30001"
-  }
-  set {
-    name = "server.extraArgs"
-    value = "-config=/etc/vault/config.hcl"
-  }
-  */
 }
 
 # Deploying VSO
@@ -157,9 +95,15 @@ resource "helm_release" "vso" {
   }
 }
 
-# VSO Kuberneters Connections
+# Waiting 60s to allow VSO CRDs to be created before proceeding with k8s deployments that reference them
+resource "time_sleep" "wait" {
+  depends_on = [helm_release.vso]
+  create_duration = "30s"
+}
 
+# VSO Kuberneters Connections
 resource "kubernetes_manifest" "blue-vault-connection-default" {
+  depends_on = [time_sleep.wait]
   manifest = {
     apiVersion = "secrets.hashicorp.com/v1beta1"
     kind       = "VaultConnection"
@@ -179,6 +123,7 @@ resource "kubernetes_manifest" "blue-vault-connection-default" {
 }
 
 resource "kubernetes_manifest" "blue-vault-auth-default" {
+  depends_on = [time_sleep.wait]
   manifest = {
     apiVersion = "secrets.hashicorp.com/v1beta1"
     kind       = "VaultAuth"
@@ -286,7 +231,6 @@ resource "kubernetes_service" "ldap" {
 
 
 ## Configuring Vault Audit Logging
-
 resource "vault_audit" "local" {
   depends_on = [ vault_namespace.red ]
   type  = "file"

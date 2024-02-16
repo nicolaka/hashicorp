@@ -23,6 +23,7 @@ data "kubernetes_service" "vault" {
     namespace = kubernetes_namespace.vault.id
   }
 }
+
 provider "vault" {
   # If you're running Terraform natively on your Mac use http://localhost:30001 (uncommment below)
   #address = "http://localhost:30001"
@@ -30,7 +31,6 @@ provider "vault" {
   address = "http://${data.kubernetes_service.vault.spec.0.cluster_ip}:8200"
   token = var.vault_admin_token
 } 
-
 
 provider "kubernetes" {
   config_path           = "~/.kube/config"

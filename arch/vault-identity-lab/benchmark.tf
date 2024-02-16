@@ -1,6 +1,4 @@
-
-
-/* 
+/* Uncomment to deploy the Vault Benchmark tool
 resource "kubernetes_config_map" "config" {
 
   metadata {
@@ -12,59 +10,35 @@ resource "kubernetes_config_map" "config" {
   }
 }
 
-## Deploying Benchmark Job
-resource "kubernetes_deployment" "benchmark" {
-  depends_on = [ vault_namespace.blue ]
+# Benchmark Job
+resource "kubernetes_job" "benchmark" {
   metadata {
-    name      = "benchmark"
+    name = "benchmark"
     namespace = kubernetes_namespace.vault.metadata[0].name
-    labels = {
-      app = "benchmark"
-    }
   }
-
-
   spec {
-    replicas = 1
-
-    strategy {
-      rolling_update {
-        max_unavailable = "1"
-      }
-    }
-
-    selector {
-      match_labels = {
-        app = "benchmark"
-      }
-    }
-
     template {
-      metadata {
-        labels = {
-          app = "benchmark"
-        }
-      }
-
+      metadata {}
       spec {
         container {
-          image = "hashicorp/vault-benchmark"
-          name  = "benchmark"
+          name    = "benchmark"
+          image   = "hashicorp/vault-benchmark"
           command = ["vault-benchmark","run","-config=/opt/vault-benchmark/configs/benchmark.hcl"]
           volume_mount {
                 mount_path = "/opt/vault-benchmark/configs/"
                 name = "config"
             }
         }
+        restart_policy = "Never"
         volume {
           name = "config"
           config_map {
             name = kubernetes_config_map.config.metadata.0.name
           }
-
-        }
       }
     }
   }
+}
+wait_for_completion = false
 }
 */

@@ -304,11 +304,10 @@ Let's make a few observations here:
 
 11. Now let's shift to Kubernetes. We will be deploying two applications `app-a` and `app-b` as kubernetes deployments into the `blue` and `red` k8s namespaces respectively. `app-a` will leverage VSO to retrieve secrets from Vault and `app-b` will use sidecar injection to retrieve secrets from Vault. 
 
-> Optional: You can enable vault raw audit logging to get more detailed logs when k8s apps authenticate into Vault. You can do that by opening a new terminal and running these commands:
+> Optional: You can view the vault raw audit logging to get more detailed logs when k8s apps authenticate into Vault. You can do that by opening a new terminal and running these commands:
 ```
 $ kubectl exec -it vault-0 -n vault -- /bin/sh
-/ $ vault audit enable file log_raw=true file_path=/tmp/vault.log 
-$ tail -f /tmp/vault.log
+/ $ tail -f /tmp/vault.log
 ...
 ```
 
