@@ -1,4 +1,5 @@
 telemetry {
   disable_hostname = true
-  prometheus_retention_time = "12h"
+  enable_hostname_label = true
+  prometheus_retention_time = "30s"
 }

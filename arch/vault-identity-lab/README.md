@@ -50,7 +50,7 @@ This repo provides the needed assets to bootstrap a working lab composed of:
     - Red & Blue Namespaces for Application Deployments
 - Kubernetes Application Deployment
     - App A and App B are sample bogus k8s application that uses a secret from Vault to be used to showcase VSO/Sidecar
-
+- Prometheus + Grafana Stack 
 
 
 ### Requirements:
@@ -83,7 +83,9 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 3. Edit the `variables.tf` file and add a valid Vault Enterprise license under the default value.
 
-4. Ensure that your Docker Desktop Kubernetes configs are located in `~/.kube/config` or update the kubernetes provider config in the `providers.tf` file to reflect the actual path for yoru kubernetes config if it's not `~/.kube/config`
+4. Ensure that your Docker Desktop Kubernetes configs are located in `~/.kube/config` or update the kubernetes provider config in the `providers.tf` file to reflect the actual path for yoru kubernetes config if it's not `~/.kube/config`. 
+
+> Note: If you are running Terraform on natively on Mac/Windows(locally) then you need to update the vault provider configs under `provider.tf` and choose the right `address` config (details in the comments in provider.tf)
 
 5. Initialize Terraform and run Terraform Plan/Apply
 
@@ -123,11 +125,18 @@ Apply complete! Resources: 43 added, 0 changed, 0 destroyed.
 
 ```
 $ kubeclt get pod -n vault
-NAME                                                            READY   STATUS    RESTARTS   AGE
-ldap-6b49f5c885-mkbk9                                           1/1     Running   0          63s
-vault-0                                                         1/1     Running   0          61s
-vault-agent-injector-559b9646cb-k9ng8                           1/1     Running   0          61s
-vso-vault-secrets-operator-controller-manager-9df69fbd5-462cw   2/2     Running   0          53s
+NAME                                                            READY   STATUS      RESTARTS   AGE
+alertmanager-prometheus-kube-prometheus-alertmanager-0          2/2     Running     0          3m3s
+benchmark-jhf5q                                                 0/1     Completed   0          2m28s
+ldap-6b49f5c885-9dc4w                                           1/1     Running     0          3m29s
+prometheus-grafana-9c98f646b-vndgg                              3/3     Running     0          3m4s
+prometheus-kube-prometheus-operator-7664bd5b4b-8nbwb            1/1     Running     0          3m4s
+prometheus-kube-state-metrics-6db866c85b-bfd8t                  1/1     Running     0          3m4s
+prometheus-prometheus-kube-prometheus-prometheus-0              2/2     Running     0          3m3s
+prometheus-prometheus-node-exporter-57kzx                       1/1     Running     0          3m4s
+vault-0                                                         1/1     Running     0          3m25s
+vault-agent-injector-559b9646cb-flbq7                           1/1     Running     0          3m26s
+vso-vault-secrets-operator-controller-manager-9df69fbd5-phw9j   2/2     Running     0          3m10s
 
 
 $  kubectl get ns    
@@ -163,13 +172,21 @@ If you go to `Entities` tab, you can see that there are pre-created entities for
 
 ```
 $ kubectl get svc -n vault          
-NAME                                         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE
-ldap                                         ClusterIP   10.108.163.250   <none>        389/TCP,636/TCP     28m
-vault                                        ClusterIP   10.107.112.76    <none>        8200/TCP,8201/TCP   28m
-vault-agent-injector-svc                     ClusterIP   10.101.134.110   <none>        443/TCP             28m
-vault-internal                               ClusterIP   None             <none>        8200/TCP,8201/TCP   28m
-vault-ui                                     NodePort    10.104.125.240   <none>        8200:30001/TCP      28m
-vso-vault-secrets-operator-metrics-service   ClusterIP   10.102.52.145    <none>        8443/TCP            28m
+NAME                                         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                         AGE
+alertmanager-operated                        ClusterIP   None             <none>        9093/TCP,9094/TCP,9094/UDP      3m24s
+ldap                                         ClusterIP   10.110.219.67    <none>        389/TCP,636/TCP                 3m50s
+prometheus-grafana                           NodePort    10.101.29.204    <none>        3000:30002/TCP                  3m25s
+prometheus-kube-prometheus-alertmanager      ClusterIP   10.111.179.214   <none>        9093/TCP,8080/TCP               3m25s
+prometheus-kube-prometheus-operator          ClusterIP   10.104.188.19    <none>        443/TCP                         3m25s
+prometheus-kube-prometheus-prometheus        NodePort    10.100.25.125    <none>        9090:30090/TCP,8080:30328/TCP   3m25s
+prometheus-kube-state-metrics                ClusterIP   10.98.97.106     <none>        8080/TCP                        3m25s
+prometheus-operated                          ClusterIP   None             <none>        9090/TCP                        3m24s
+prometheus-prometheus-node-exporter          ClusterIP   10.100.255.59    <none>        9100/TCP                        3m25s
+vault                                        ClusterIP   10.104.211.49    <none>        8200/TCP,8201/TCP               3m47s
+vault-agent-injector-svc                     ClusterIP   10.108.174.26    <none>        443/TCP                         3m47s
+vault-internal                               ClusterIP   None             <none>        8200/TCP,8201/TCP               3m47s
+vault-ui                                     NodePort    10.99.40.171     <none>        8200:30001/TCP                  3m47s
+vso-vault-secrets-operator-metrics-service   ClusterIP   10.107.65.13     <none>        8443/TCP                        3m31s
 
 
 $ export VAULT_ADDR="http://localhost:8200" # alternatively VAULT_ADDR="http://10.107.112.76:8200"
@@ -822,6 +839,12 @@ Similarily, we have a detailed audit log to show us the auth request details:
     }
 }
 ```
+
+### Prometheus + Grafana Dashboards
+
+We deployed a full Prometheus + Grafana Stack and loaded up a sample Grafana dashboard to monitor Vault and VSO. You can access Grafana using `http://localhost:30002` and login with username `admin` and password `prom-operator`. Then go to **Dashboards > HashiCorp Vault** 
+
+![img](img/vault_grafana_dashboard.png)
 
 ### Conclusion
 

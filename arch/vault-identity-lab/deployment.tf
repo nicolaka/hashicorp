@@ -98,7 +98,7 @@ resource "helm_release" "vso" {
 # Waiting 60s to allow VSO CRDs to be created before proceeding with k8s deployments that reference them
 resource "time_sleep" "wait" {
   depends_on = [helm_release.vso]
-  create_duration = "30s"
+  create_duration = "60s"
 }
 
 # VSO Kuberneters Connections
