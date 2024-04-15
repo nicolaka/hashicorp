@@ -101,6 +101,11 @@ resource "time_sleep" "wait" {
   create_duration = "60s"
 }
 
+
+# Important Note ###
+# The below two deployments "blue-vault-connection-default" and "blue-vault-auth-default" require VSO CRD to be installed
+# First before you can run a Terraform Plan or Apply. Therefore it's required for you to comment these two resources out, run Terraform apply, then uncomment
+# Them and run Terraform one more time! 
 # VSO Kuberneters Connections
 resource "kubernetes_manifest" "blue-vault-connection-default" {
   depends_on = [time_sleep.wait]
@@ -145,6 +150,7 @@ resource "kubernetes_manifest" "blue-vault-auth-default" {
     }
   }
 }
+
 
 ## Deploying LDAP 
 resource "kubernetes_deployment" "ldap" {

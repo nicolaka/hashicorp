@@ -83,9 +83,11 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 3. Edit the `variables.tf` file and add a valid Vault Enterprise license under the default value.
 
-4. Ensure that your Docker Desktop Kubernetes configs are located in `~/.kube/config` or update the kubernetes provider config in the `providers.tf` file to reflect the actual path for yoru kubernetes config if it's not `~/.kube/config`. 
+4. Ensure that your Docker Desktop Kubernetes configs are located in `~/.kube/config` or update the kubernetes provider config in the `providers.tf` file to reflect the actual path for your kubernetes config if it's not `~/.kube/config`. 
 
-> Note: If you are running Terraform on natively on Mac/Windows(locally) then you need to update the vault provider configs under `provider.tf` and choose the right `address` config (details in the comments in provider.tf)
+> Note: If you are running Terraform on natively on Mac/Windows(locally) then you need to update the Vault provider configs under `provider.tf` and choose the right `address` config (details in the comments in provider.tf) 
+
+> Note: If you've never installed Vault Secret Operator(VSO) before on your Kubernetes cluster, you would need to first run the Terraform first with commented out "blue-vault-connection-default" and "blue-vault-auth-default" in deployment.tf, ensure that the CRDs are deployed, and re-run Terraform with these two resources uncommented. 
 
 5. Initialize Terraform and run Terraform Plan/Apply
 
@@ -840,11 +842,34 @@ Similarily, we have a detailed audit log to show us the auth request details:
 }
 ```
 
+
+
 ### Prometheus + Grafana Dashboards
 
-We deployed a full Prometheus + Grafana Stack and loaded up a sample Grafana dashboard to monitor Vault and VSO. You can access Grafana using `http://localhost:30002` and login with username `admin` and password `prom-operator`. Then go to **Dashboards > HashiCorp Vault** 
+We deployed a full Prometheus + Grafana Stack and loaded up a sample Grafana dashboard to monitor Vault and VSO. You can access Grafana using `http://localhost:30002` and login with username `admin` and password `vault`. Then go to **Dashboards > HashiCorp Vault** 
 
 ![img](img/vault_grafana_dashboard.png)
+
+
+### Vault API Reference
+```
+# Returns details on the total number of entities 
+$ http $VAULT_ADDR/v1/sys/internal/counters/entities "X-Vault-Token: $VAULT_TOKEN"
+
+ # Returns details on the total number of tokens
+$ http $VAULT_ADDR/v1/sys/internal/counters/tokens "X-Vault-Token: $VAULT_TOKEN"
+
+ 
+# Returns total client count breakdown by auth method by namespace and new clients by month
+$ http $VAULT_ADDR/v1/sys/internal/counters/activity "X-Vault-Token: $VAULT_TOKEN" 
+
+# Returns a list of unique clients that had activity within the provided start/end time 
+$ http $VAULT_ADDR/v1/sys/internal/counters/activity/export "X-Vault-Token: $VAULT_TOKEN" 
+
+  
+# Returns client activity for the current month 
+$ http $VAULT_ADDR/v1/sys/internal/counters/activity/monthly "X-Vault-Token: $VAULT_TOKEN" 
+```
 
 ### Conclusion
 
@@ -864,34 +889,7 @@ Understanding how entities, entity aliases and clients work in Vault is critical
 - Entities are global in a performance-replicated multi Vault Enterprise cluster deployments. Clients, however, are only local to the cluster. 
 
 
-### Some Helpful Vault API Endpoints 
-
-```
-
-$ http $VAULT_ADDR/v1/sys/internal/counters/entities "X-Vault-Token: $VAULT_TOKEN"
-
-  # Returns details on the total number of entities 
-
-$ http $VAULT_ADDR/v1/sys/internal/counters/tokens "X-Vault-Token: $VAULT_TOKEN"
-
-  # Returns details on the total number of tokens
-
-$ http $VAULT_ADDR/v1/sys/internal/counters/activity "X-Vault-Token: $VAULT_TOKEN" 
-
-  # Returns total client count breakdown by auth method by namespace and new clients by month
-
-$ http $VAULT_ADDR/v1/sys/internal/counters/activity/export "X-Vault-Token: $VAULT_TOKEN" 
-
-  # Returns a list of unique clients that had activity within the provided start/end time 
-
-$ http $VAULT_ADDR/v1/sys/internal/counters/activity/monthly "X-Vault-Token: $VAULT_TOKEN" 
-
- # Returns client activity for the current month 
-```
-
 ### Teardown
-
-
 
 ```
 $ kubectl delete -f app-a.yml -n blue

@@ -8,7 +8,7 @@ variable kubernetes_endpoint {
 variable "vault_version" {
   type = string
   description = "Vault Version"
-  default = "1.15.4-ent"
+  default = "latest"
 }
 
 variable "vault_license" {
@@ -49,8 +49,6 @@ variable vault_admin_token {
   default     = "root"
   description = "Vault Token" 
 }
-
-
 
 variable kubernetes_namespace {
   type        = string

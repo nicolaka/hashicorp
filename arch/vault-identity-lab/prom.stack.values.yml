@@ -929,7 +929,9 @@ alertmanager:
 grafana:
   enabled: true
   namespaceOverride: ""
-
+  plugins: 
+    - marcusolsson-json-datasource
+    - yesoreyeram-infinity-datasource
   ## ForceDeployDatasources Create datasource configmap even if grafana deployment has been disabled
   ##
   forceDeployDatasources: false
@@ -951,7 +953,7 @@ grafana:
   ##
   defaultDashboardsEditable: true
 
-  adminPassword: prom-operator
+  adminPassword: vault
 
   rbac:
     ## If true, Grafana PSPs will be created
@@ -1007,7 +1009,7 @@ grafana:
   #   size: 20Gi
   #   finalizers:
   #     - kubernetes.io/pvc-protection
-
+  
   sidecar:
     dashboards:
       enabled: true
@@ -1081,7 +1083,23 @@ grafana:
 
   ## Configure additional grafana datasources (passed through tpl)
   ## ref: http://docs.grafana.org/administration/provisioning/#datasources
-  additionalDataSources: []
+  additionalDataSources: 
+    - name: "Vault API"
+      type: "yesoreyeram-infinity-datasource"
+      url: "http://vault.vault.svc.cluster.local:8200"
+      basicAuth: false
+      basicAuthUser: ""
+      isDefault: false
+      jsonData:
+        allowedHosts:
+          - "http://vault.vault.svc.cluster.local:8200"
+        apiKeyKey: "X-Vault-Token"
+        auth_method: "apiKey"
+        global_queries: []
+        oauthPassThru: false
+      readOnly: false
+      secureJsonData:
+        apiKeyValue: "root"
   # - name: prometheus-sample
   #   access: proxy
   #   basicAuth: true

@@ -120,6 +120,7 @@ resource "vault_identity_entity" "app_b" {
 }
 
 
+
 resource "vault_identity_entity_alias" "app_b_approle_alias" {
   name            = vault_approle_auth_backend_role.app_b.role_id
   mount_accessor  = vault_auth_backend.approle.accessor
@@ -129,7 +130,6 @@ resource "vault_identity_entity_alias" "app_b_approle_alias" {
     auth = "approle"
   }
 }
-
 
 
 resource "vault_identity_entity_alias" "app_b_k8s_alias" {

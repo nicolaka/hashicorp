@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: app-b
-  replicas: 1
+  replicas: 10
   template:
     metadata:
       annotations:
