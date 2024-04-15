@@ -27,7 +27,6 @@ data "kubernetes_service" "vault" {
 provider "vault" {
   skip_child_token = true
   # If you're running Terraform natively on your Mac use http://localhost:30001 (uncommment below)
-  #address = "http://10.109.217.100:8200"
   #address = "http://localhost:30001" 
   # If you're running Terraform in a container on your mac, use http://${data.kubernetes_service.vault.spec.0.cluster_ip}:8200 (uncomment below)
   address = "http://${data.kubernetes_service.vault.spec.0.cluster_ip}:8200"
