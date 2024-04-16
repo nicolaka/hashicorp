@@ -1100,18 +1100,19 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "fixedColor": "purple",
+            "mode": "fixed"
           },
           "custom": {
             "axisBorderShow": false,
-            "axisCenteredZero": false,
+            "axisCenteredZero": true,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 10,
+            "gradientMode": "hue",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -1119,12 +1120,15 @@
             },
             "insertNulls": false,
             "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
             "lineWidth": 2,
-            "pointSize": 5,
+            "pointSize": 8,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "always",
             "spanNulls": true,
             "stacking": {
               "group": "A",
@@ -1171,7 +1175,7 @@
         ]
       },
       "gridPos": {
-        "h": 9,
+        "h": 10,
         "w": 12,
         "x": 0,
         "y": 24
@@ -1402,8 +1406,8 @@
             "axisPlacement": "left",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "opacity",
+            "fillOpacity": 16,
+            "gradientMode": "hue",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -1414,8 +1418,8 @@
             "lineStyle": {
               "fill": "solid"
             },
-            "lineWidth": 2,
-            "pointSize": 6,
+            "lineWidth": 3,
+            "pointSize": 8,
             "scaleDistribution": {
               "type": "linear"
             },
@@ -1431,6 +1435,7 @@
           },
           "links": [],
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1444,7 +1449,7 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "none"
         },
         "overrides": []
       },
@@ -1452,7 +1457,7 @@
         "h": 12,
         "w": 12,
         "x": 0,
-        "y": 33
+        "y": 34
       },
       "id": 61,
       "options": {
@@ -1488,7 +1493,7 @@
           "refId": "A"
         }
       ],
-      "title": "Vault Entities over Time Series Graph",
+      "title": "Vault Entities Time Series Graph",
       "transparent": true,
       "type": "timeseries"
     },
@@ -1521,7 +1526,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 10,
         "w": 12,
         "x": 12,
         "y": 34
@@ -1591,10 +1596,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 13,
+        "h": 19,
         "w": 12,
         "x": 12,
-        "y": 43
+        "y": 44
       },
       "id": 49,
       "maxDataPoints": 1000,
@@ -1652,6 +1657,224 @@
       "fieldConfig": {
         "defaults": {
           "color": {
+            "fixedColor": "transparent",
+            "mode": "fixed"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "mode": "basic",
+              "type": "color-background"
+            },
+            "filterable": true,
+            "inspect": true
+          },
+          "fieldMinMax": false,
+          "mappings": [
+            {
+              "options": {
+                "name": {
+                  "index": 0,
+                  "text": "Name"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "canonical_id"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 328
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "13508048-8d64-067d-855f-58d06e0d2f59"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 325
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "custom_metadata"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 408
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Client ID"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 344
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 17,
+        "w": 12,
+        "x": 0,
+        "y": 46
+      },
+      "id": 163,
+      "interval": "10s",
+      "options": {
+        "cellHeight": "md",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 1,
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "10.4.1",
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "canonical_id",
+              "text": "Client ID",
+              "type": "string"
+            },
+            {
+              "selector": "custom_metadata",
+              "text": "Custom Metadata",
+              "type": "string"
+            },
+            {
+              "selector": "local",
+              "text": "Is Local",
+              "type": "boolean"
+            },
+            {
+              "selector": "mount_accessor",
+              "text": "Mount Accessor",
+              "type": "string"
+            },
+            {
+              "selector": "mount_path",
+              "text": "Mount Path",
+              "type": "string"
+            },
+            {
+              "selector": "mount_type",
+              "text": "Mount Type",
+              "type": "string"
+            },
+            {
+              "selector": "name",
+              "text": "Name",
+              "type": "string"
+            }
+          ],
+          "computed_columns": [],
+          "csv_options": {
+            "skip_empty_lines": false
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "P8BCA6AF7BF6364B9"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "",
+          "groq": "*",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "data.key_info[*].*",
+          "source": "url",
+          "type": "json",
+          "uql": "parse-json",
+          "url": "http://vault.vault.svc.cluster.local:8200/v1/identity/alias/id?list=true",
+          "url_options": {
+            "data": "",
+            "method": "GET",
+            "params": [
+              {
+                "key": "end_time",
+                "value": "${__from:date:seconds}"
+              },
+              {
+                "key": "format",
+                "value": "csv"
+              }
+            ]
+          }
+        }
+      ],
+      "title": "Entity Aliase Summary",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {
+              "Client ID": 0,
+              "Custom Metadata": 5,
+              "Is Local": 6,
+              "Mount Accessor": 4,
+              "Mount Path": 2,
+              "Mount Type": 3,
+              "Name": 1
+            },
+            "renameByName": {}
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "P8BCA6AF7BF6364B9"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
             "mode": "thresholds"
           },
           "custom": {
@@ -1683,7 +1906,7 @@
         "h": 11,
         "w": 4,
         "x": 0,
-        "y": 45
+        "y": 63
       },
       "id": 160,
       "options": {
@@ -1778,7 +2001,7 @@
         "h": 11,
         "w": 8,
         "x": 4,
-        "y": 45
+        "y": 63
       },
       "id": 162,
       "options": {
@@ -1835,165 +2058,12 @@
       "type": "table"
     },
     {
-      "datasource": {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "P8BCA6AF7BF6364B9"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": true,
-            "inspect": true
-          },
-          "fieldMinMax": false,
-          "mappings": [
-            {
-              "options": {
-                "name": {
-                  "index": 0,
-                  "text": "Name"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "canonical_id"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 319
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "13508048-8d64-067d-855f-58d06e0d2f59"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 325
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 24,
-        "x": 0,
-        "y": 56
-      },
-      "id": 163,
-      "interval": "10s",
-      "options": {
-        "cellHeight": "md",
-        "footer": {
-          "countRows": false,
-          "enablePagination": true,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "frameIndex": 1,
-        "showHeader": true,
-        "sortBy": []
-      },
-      "pluginVersion": "10.4.1",
-      "targets": [
-        {
-          "columns": [],
-          "computed_columns": [],
-          "csv_options": {
-            "skip_empty_lines": false
-          },
-          "datasource": {
-            "type": "yesoreyeram-infinity-datasource",
-            "uid": "P8BCA6AF7BF6364B9"
-          },
-          "filters": [],
-          "format": "table",
-          "global_query_id": "",
-          "groq": "*",
-          "parser": "backend",
-          "refId": "A",
-          "root_selector": "data.key_info[*].*",
-          "source": "url",
-          "type": "json",
-          "uql": "parse-json",
-          "url": "http://vault.vault.svc.cluster.local:8200/v1/identity/alias/id?list=true",
-          "url_options": {
-            "data": "",
-            "method": "GET",
-            "params": [
-              {
-                "key": "end_time",
-                "value": "${__from:date:seconds}"
-              },
-              {
-                "key": "format",
-                "value": "csv"
-              }
-            ]
-          }
-        }
-      ],
-      "title": "Entity Aliase Summary",
-      "transformations": [
-        {
-          "id": "joinByField",
-          "options": {
-            "byField": "A canonical_id",
-            "mode": "outer"
-          }
-        },
-        {
-          "id": "joinByField",
-          "options": {
-            "byField": "client_id",
-            "mode": "inner"
-          }
-        }
-      ],
-      "transparent": true,
-      "type": "table"
-    },
-    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 67
+        "y": 74
       },
       "id": 155,
       "panels": [],
@@ -2049,7 +2119,7 @@
         "h": 5,
         "w": 23,
         "x": 0,
-        "y": 68
+        "y": 75
       },
       "id": 156,
       "options": {
@@ -2104,7 +2174,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 73
+        "y": 80
       },
       "id": 16,
       "panels": [],
@@ -2145,7 +2215,7 @@
         "h": 4,
         "w": 3,
         "x": 0,
-        "y": 74
+        "y": 81
       },
       "id": 53,
       "options": {
@@ -2215,7 +2285,7 @@
         "h": 8,
         "w": 21,
         "x": 3,
-        "y": 74
+        "y": 81
       },
       "id": 78,
       "options": {
@@ -2290,7 +2360,7 @@
         "h": 4,
         "w": 3,
         "x": 0,
-        "y": 78
+        "y": 85
       },
       "id": 8,
       "maxDataPoints": 100,
@@ -2385,7 +2455,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 82
+        "y": 89
       },
       "id": 104,
       "options": {
@@ -2491,7 +2561,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 91
+        "y": 98
       },
       "id": 102,
       "options": {
@@ -2579,7 +2649,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 91
+        "y": 98
       },
       "id": 100,
       "options": {
@@ -2682,7 +2752,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 99
+        "y": 106
       },
       "id": 14,
       "options": {
@@ -2724,7 +2794,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 105
+        "y": 112
       },
       "id": 20,
       "panels": [],
@@ -2769,7 +2839,7 @@
         "h": 5,
         "w": 3,
         "x": 0,
-        "y": 106
+        "y": 113
       },
       "id": 97,
       "maxDataPoints": 100,
@@ -2873,7 +2943,7 @@
         "h": 10,
         "w": 21,
         "x": 3,
-        "y": 106
+        "y": 113
       },
       "id": 4,
       "options": {
@@ -2968,7 +3038,7 @@
         "h": 5,
         "w": 3,
         "x": 0,
-        "y": 111
+        "y": 118
       },
       "id": 98,
       "maxDataPoints": 100,
@@ -3125,7 +3195,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {

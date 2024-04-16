@@ -1,6 +1,6 @@
 # Vault Clients Lab
 
-![img](img/vault_clients_arch_v3.png)
+![img](img/vault_identity_lab_arch.png)
 
 ### Goal
 
@@ -50,6 +50,7 @@ This repo provides the needed assets to bootstrap a working lab composed of:
     - Red & Blue Namespaces for Application Deployments
 - Kubernetes Application Deployment
     - App A and App B are sample bogus k8s application that uses a secret from Vault to be used to showcase VSO/Sidecar
+- Vault Benchmark Tool 
 - Prometheus + Grafana Stack 
 
 
@@ -153,7 +154,15 @@ vault             Active   2m21s
 
 ```
 
-7. Now you can access Vault's UI from your local machine browser. On Mac, you can use `http://localhost:30001` and it should take you to Vault's UI. You can login using token method with the token value of `root`. 
+7. Once you deploy, these are the exposed services that you can acccess via your web browser:
+
+| Name | Description | IP/Port | Credentials
+| - | - | - | - |
+| Vault Enterprise | Vault Enterprise Server - Single Replica | `http://localhost:30001` | `root` |
+| Prometheus | Prometheus Server | `http://localhost:30090` | None |
+| Grafana | Grafana Server | `http://localhost:30002` | `admin/vault` |
+
+8. Now you can access Vault's UI from your local machine browser. On Mac, you can use `http://localhost:30001` and it should take you to Vault's UI. You can login using token method with the token value of `root`. 
 
 
 
@@ -842,14 +851,7 @@ Similarily, we have a detailed audit log to show us the auth request details:
 }
 ```
 
-
-
-### Prometheus + Grafana Dashboards
-
-We deployed a full Prometheus + Grafana Stack and loaded up a sample Grafana dashboard to monitor Vault and VSO. You can access Grafana using `http://localhost:30002` and login with username `admin` and password `vault`. Then go to **Dashboards > HashiCorp Vault** 
-
-![img](img/vault_grafana_dashboard.png)
-
+13. Done :) below, are some additional references on Vault API, Prometheus / Grafana, and key takeaways. 
 
 ### Vault API Reference
 ```
@@ -869,7 +871,31 @@ $ http $VAULT_ADDR/v1/sys/internal/counters/activity/export "X-Vault-Token: $VAU
   
 # Returns client activity for the current month 
 $ http $VAULT_ADDR/v1/sys/internal/counters/activity/monthly "X-Vault-Token: $VAULT_TOKEN" 
+
 ```
+
+### Prometheus + Grafana Dashboards
+
+We deployed a full Prometheus + Grafana Stack and loaded up a sample Grafana dashboard to monitor Vault and VSO. You can access Grafana using `http://localhost:30002` and login with username `admin` and password `vault`. Then go to **Dashboards > HashiCorp Vault** 
+
+![img](img/vault_grafana_dashboard.png)
+
+
+## Grafana Dashboard Summary
+| Name | Description | Data Source (API or Telemetry) | Type | Scope  | Implementation Status |
+| - | - | - | - | -| -| 
+| Current Total Entity Count | The total number of identity entities currently stored in Vault | `vault.identity.num_entities` | `Gauge` | Global |  ✅ | 
+| Current Total Entity Count Time-Series Graph | The total number of identity entities currently stored in Vault | `vault.identity.num_entities` | `Time-Series Graph` | Global |  ✅ | 
+| Entity List | A list of identity entities currently stored in Vault | `/v1/identity/entity/name?list=true` | `Table` | Global |  ✅ | 
+| Entity Alias Count by Auth Method | The number of identity entity aliases by auth method | `vault_identity_entity_alias_count` | `Chart` | Global |  ✅ | 
+| Entity Alias Count by Namespace | The number of identity entity aliases by namespace | `vault_identity_entity_alias_count` | `Chart` | Global | ❌ | 
+| Vault Clients Summary (Current Month) | A summary of distinct entities that created a token during the current month | `/internal/counters/activity/monthly` | `Table` | Global |  ✅ | 
+| Active Clients Count (Current Month) | The number of distinct entities (per namespace) that created a token during the current month | `vault.identity.entity.active.partial_month` |`Gauge`| Global |  ✅ |
+| Active Clients Count (Current Month) Time-Series Graph| The number of distinct entities (per namespace) that created a token during the current month | `vault.identity.entity.active.partial_month` | `Time-Series Graph` | Global |  ✅ |
+| Monthly Client Clount Time-Series Graph| The number of distinct entities (per namespace) that created a token during the past month | `vault.identity.entity.active.monthly` | `Time-Series Graph` | Global |  ✅ |  
+| Active Client Details| Detailed summary of clients | `/v1/sys/internal/counters/activity/export` | `Table` | Global |  ✅ |  
+| Entity Alias Details| Detailed summary of entity aliases | `/v1/identity/alias/id?list=true` | `Table` | Global |  ✅ |  
+
 
 ### Conclusion
 
