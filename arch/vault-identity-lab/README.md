@@ -1,4 +1,4 @@
-# Vault Clients Lab
+# Vault Identity System & Clients Lab
 
 ![img](img/vault_identity_lab_arch.png)
 
@@ -200,17 +200,12 @@ vault-ui                                     NodePort    10.99.40.171     <none>
 vso-vault-secrets-operator-metrics-service   ClusterIP   10.107.65.13     <none>        8443/TCP                        3m31s
 
 
-$ export VAULT_ADDR="http://localhost:8200" # alternatively VAULT_ADDR="http://10.107.112.76:8200"
+$ export VAULT_ADDR="http://localhost:8200" # alternatively VAULT_ADDR="http://10.107.112.76:8200" or "http://localhost:30001"
 $ export VAULT_TOKEN="root"
 $ export VAULT_NAMESPACE="root"
 
 $ http $VAULT_ADDR/v1/sys/internal/counters/entities "X-Vault-Token: $VAULT_TOKEN"
-HTTP/1.1 200 OK
-Cache-Control: no-store
-Content-Length: 195
-Content-Type: application/json
-Date: Tue, 06 Feb 2024 21:11:18 GMT
-Strict-Transport-Security: max-age=31536000; includeSubDomains
+...
 
 {
     "auth": null,
@@ -230,12 +225,7 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains
 }
 
 $ http $VAULT_ADDR/v1/sys/internal/counters/activity "X-Vault-Token: $VAULT_TOKEN" 
-HTTP/1.1 200 OK
-Cache-Control: no-store
-Content-Length: 367
-Content-Type: application/json
-Date: Tue, 06 Feb 2024 21:12:44 GMT
-Strict-Transport-Security: max-age=31536000; includeSubDomains
+...
 
 {
     "auth": null,
@@ -262,13 +252,7 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains
 
 $ http $VAULT_ADDR/v1/sys/internal/counters/activity/monthly "X-Vault-Token: $VAULT_TOKEN" 
 
-HTTP/1.1 200 OK
-Cache-Control: no-store
-Content-Length: 287
-Content-Type: application/json
-Date: Tue, 06 Feb 2024 21:49:05 GMT
-Strict-Transport-Security: max-age=31536000; includeSubDomains
-
+...
 {
     "auth": null,
     "data": {
@@ -361,16 +345,8 @@ If you see that the application is in the `Running` state, that means it was abl
 
 ```
 $ http $VAULT_ADDR/v1/sys/internal/counters/activity/monthly "X-Vault-Token: $VAULT_TOKEN" 
-HTTP/1.1 200 OK
-Cache-Control: no-store
-Content-Length: 1918
-Content-Type: application/json
-Date: Tue, 06 Feb 2024 22:45:17 GMT
-Strict-Transport-Security: max-age=31536000; includeSubDomains
+...
 
-{
-    "auth": null,
-    "data": {
         "by_namespace": [
             {
                 "counts": {
@@ -409,107 +385,7 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains
         "clients": 2,
         "distinct_entities": 2,
         "entity_clients": 2,
-        "months": [
-            {
-                "counts": {
-                    "clients": 2,
-                    "distinct_entities": 0,
-                    "entity_clients": 2,
-                    "non_entity_clients": 0,
-                    "non_entity_tokens": 0
-                },
-                "namespaces": [
-                    {
-                        "counts": {
-                            "clients": 2,
-                            "distinct_entities": 0,
-                            "entity_clients": 2,
-                            "non_entity_clients": 0,
-                            "non_entity_tokens": 0
-                        },
-                        "mounts": [
-                            {
-                                "counts": {
-                                    "clients": 1,
-                                    "distinct_entities": 0,
-                                    "entity_clients": 1,
-                                    "non_entity_clients": 0,
-                                    "non_entity_tokens": 0
-                                },
-                                "mount_path": "auth/kubernetes/"
-                            },
-                            {
-                                "counts": {
-                                    "clients": 1,
-                                    "distinct_entities": 0,
-                                    "entity_clients": 1,
-                                    "non_entity_clients": 0,
-                                    "non_entity_tokens": 0
-                                },
-                                "mount_path": "auth/ldap/"
-                            }
-                        ],
-                        "namespace_id": "root",
-                        "namespace_path": ""
-                    }
-                ],
-                "new_clients": {
-                    "counts": {
-                        "clients": 2,
-                        "distinct_entities": 0,
-                        "entity_clients": 2,
-                        "non_entity_clients": 0,
-                        "non_entity_tokens": 0
-                    },
-                    "namespaces": [
-                        {
-                            "counts": {
-                                "clients": 2,
-                                "distinct_entities": 0,
-                                "entity_clients": 2,
-                                "non_entity_clients": 0,
-                                "non_entity_tokens": 0
-                            },
-                            "mounts": [
-                                {
-                                    "counts": {
-                                        "clients": 1,
-                                        "distinct_entities": 0,
-                                        "entity_clients": 1,
-                                        "non_entity_clients": 0,
-                                        "non_entity_tokens": 0
-                                    },
-                                    "mount_path": "auth/ldap/"
-                                },
-                                {
-                                    "counts": {
-                                        "clients": 1,
-                                        "distinct_entities": 0,
-                                        "entity_clients": 1,
-                                        "non_entity_clients": 0,
-                                        "non_entity_tokens": 0
-                                    },
-                                    "mount_path": "auth/kubernetes/"
-                                }
-                            ],
-                            "namespace_id": "root",
-                            "namespace_path": ""
-                        }
-                    ]
-                },
-                "timestamp": "2024-02-01T00:00:00Z"
-            }
-        ],
-        "non_entity_clients": 0,
-        "non_entity_tokens": 0
-    },
-    "lease_duration": 0,
-    "lease_id": "",
-    "renewable": false,
-    "request_id": "0b6f6332-6720-890c-e1a3-887fa74ca663",
-    "warnings": null,
-    "wrap_info": null
-}
+...
 ```
 
 You can see that there are two clients now. The newly added k8s client after `app_a` was deloyed and VSO used its k8s auth to retrieve a secret on its behalf.  We can also see an audit log entry with very detailed log of the auth request. Particularly, you can see service account details that were used when matching this pod to the exisiting `app_a` entity and `entity_alias`. Because of that, Vault will not create any new entities or entity aliases. It will recognize the exisiting ones and associate this pod (via its service account name in this case) to the exisiting entity and entity alias. 
@@ -614,16 +490,8 @@ Checking again the client count:
 ![img](img/vault_ui_12.png)
 
 ```
- http $VAULT_ADDR/v1/sys/internal/counters/activity/monthly "X-Vault-Token: $VAULT_TOKEN" 
-HTTP/1.1 200 OK
-Cache-Control: no-store
-Content-Length: 1918
-Content-Type: application/json
-Date: Tue, 06 Feb 2024 22:56:08 GMT
-Strict-Transport-Security: max-age=31536000; includeSubDomains
-
-{
-    "auth": null,
+ $ http $VAULT_ADDR/v1/sys/internal/counters/activity/monthly "X-Vault-Token: $VAULT_TOKEN" 
+...
     "data": {
         "by_namespace": [
             {
@@ -663,107 +531,7 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains
         "clients": 3,
         "distinct_entities": 3,
         "entity_clients": 3,
-        "months": [
-            {
-                "counts": {
-                    "clients": 3,
-                    "distinct_entities": 0,
-                    "entity_clients": 3,
-                    "non_entity_clients": 0,
-                    "non_entity_tokens": 0
-                },
-                "namespaces": [
-                    {
-                        "counts": {
-                            "clients": 3,
-                            "distinct_entities": 0,
-                            "entity_clients": 3,
-                            "non_entity_clients": 0,
-                            "non_entity_tokens": 0
-                        },
-                        "mounts": [
-                            {
-                                "counts": {
-                                    "clients": 2,
-                                    "distinct_entities": 0,
-                                    "entity_clients": 2,
-                                    "non_entity_clients": 0,
-                                    "non_entity_tokens": 0
-                                },
-                                "mount_path": "auth/kubernetes/"
-                            },
-                            {
-                                "counts": {
-                                    "clients": 1,
-                                    "distinct_entities": 0,
-                                    "entity_clients": 1,
-                                    "non_entity_clients": 0,
-                                    "non_entity_tokens": 0
-                                },
-                                "mount_path": "auth/ldap/"
-                            }
-                        ],
-                        "namespace_id": "root",
-                        "namespace_path": ""
-                    }
-                ],
-                "new_clients": {
-                    "counts": {
-                        "clients": 3,
-                        "distinct_entities": 0,
-                        "entity_clients": 3,
-                        "non_entity_clients": 0,
-                        "non_entity_tokens": 0
-                    },
-                    "namespaces": [
-                        {
-                            "counts": {
-                                "clients": 3,
-                                "distinct_entities": 0,
-                                "entity_clients": 3,
-                                "non_entity_clients": 0,
-                                "non_entity_tokens": 0
-                            },
-                            "mounts": [
-                                {
-                                    "counts": {
-                                        "clients": 2,
-                                        "distinct_entities": 0,
-                                        "entity_clients": 2,
-                                        "non_entity_clients": 0,
-                                        "non_entity_tokens": 0
-                                    },
-                                    "mount_path": "auth/kubernetes/"
-                                },
-                                {
-                                    "counts": {
-                                        "clients": 1,
-                                        "distinct_entities": 0,
-                                        "entity_clients": 1,
-                                        "non_entity_clients": 0,
-                                        "non_entity_tokens": 0
-                                    },
-                                    "mount_path": "auth/ldap/"
-                                }
-                            ],
-                            "namespace_id": "root",
-                            "namespace_path": ""
-                        }
-                    ]
-                },
-                "timestamp": "2024-02-01T00:00:00Z"
-            }
-        ],
-        "non_entity_clients": 0,
-        "non_entity_tokens": 0
-    },
-    "lease_duration": 0,
-    "lease_id": "",
-    "renewable": false,
-    "request_id": "b66532c2-19b9-9ff3-99c0-0b9203567782",
-    "warnings": null,
-    "wrap_info": null
-}
+ 
 ```
 
 Similarily, we have a detailed audit log to show us the auth request details:
@@ -853,7 +621,7 @@ Similarily, we have a detailed audit log to show us the auth request details:
 
 13. Done :) below, are some additional references on Vault API, Prometheus / Grafana, and key takeaways. 
 
-### Vault API Reference
+### Vault API Identity + Clients Reference
 ```
 # Returns details on the total number of entities 
 $ http $VAULT_ADDR/v1/sys/internal/counters/entities "X-Vault-Token: $VAULT_TOKEN"
@@ -921,6 +689,13 @@ Understanding how entities, entity aliases and clients work in Vault is critical
 $ kubectl delete -f app-a.yml -n blue
 $ kubectl delete -f app-b.yml -n red
 $ terraform destroy --auto-approve
+```
+
+For brute-force style teardown, you can issue `kubectl delete ns blue red vault`, and in case you have a namespace stuck in the `Terminating` state you can issue this command to clear any k8s finalizers 
+
+```
+NS=`kubectl get ns |grep Terminating | awk 'NR==1 {print $1}'` && kubectl get namespace "$NS" -o json | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/"   | kubectl replace --raw /api/v1/namespaces/$NS/finalize -f - 
+
 ```
 
 
