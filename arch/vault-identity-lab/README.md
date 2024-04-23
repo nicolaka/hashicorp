@@ -122,6 +122,14 @@ $ terraform apply --auto-approve
 
 Apply complete! Resources: 43 added, 0 changed, 0 destroyed.
 
+Outputs:
+
+alice_entity_lookup_id = "5ebdf273-3465-a6a3-0f39-9b1965e8cfcd"
+alice_pre_created_entity_id = "8cd5d3de-e251-33b7-eed7-943fd916c2fe"
+bob_entity_lookup_id = "2129b0a3-32fa-da3f-06c6-804d00bda5ba"
+bob_pre_created_entity_id = "2129b0a3-32fa-da3f-06c6-804d00bda5ba"
+dave_entity_lookup_id = "fbd55dbe-bfdb-5b49-c8b9-14c6667b37a5"
+
 ```
 
 6. It will take a few minutes for the deloyment to finish, once it does you can validate that it deployed successfully
@@ -275,26 +283,8 @@ $ http $VAULT_ADDR/v1/sys/internal/counters/activity/monthly "X-Vault-Token: $VA
 ```
 
 
-9. At this point, we have all the required configurations so we can start testing creating clients. You can uncomment the `login.tf` configs, which would emulate Bob & Alice authenticating into Vault using the `userpass` auth method. Dave authenticating using `userpass` method. It will also emulate authenticating `approle_a` and `approle_b` into Vault's approle auth method. 
+9. Let's make a few observations here:
 
-
-```
-$ terraform apply --auto-approve
-
-...
-
-Apply complete! Resources: 8 added, 0 changed, 0 destroyed.
-
-Outputs:
-
-alice_entity_lookup_id = "5ebdf273-3465-a6a3-0f39-9b1965e8cfcd"
-alice_pre_created_entity_id = "8cd5d3de-e251-33b7-eed7-943fd916c2fe"
-bob_entity_lookup_id = "2129b0a3-32fa-da3f-06c6-804d00bda5ba"
-bob_pre_created_entity_id = "2129b0a3-32fa-da3f-06c6-804d00bda5ba"
-dave_entity_lookup_id = "fbd55dbe-bfdb-5b49-c8b9-14c6667b37a5"
-```
-
-Let's make a few observations here:
 -  First, you can see from the Terraform output that Bob's pre created entity ID matches the entity ID associated with the token (`2129b0a3-32fa-da3f-06c6-804d00bda5ba`) while that's not the case for Alice. This is due to the fact that we never created or associated a userpass alias to Alice's entity. So we should expect Alice to be able to authenticate, but Vault wouldn't recognize it as having an exisiting entity and therefore it will create a new entity for it (see below)
 
 ![img](img/vault_ui_9a.png)
