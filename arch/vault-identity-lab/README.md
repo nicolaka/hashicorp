@@ -1,6 +1,6 @@
 # Vault Identity System & Clients Lab
 
-![img](img/vault_identity_lab_arch.png)
+![img](img/vault_lab_arch.png)
 
 ### Goal
 
